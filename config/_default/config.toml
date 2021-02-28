@@ -12,3 +12,5 @@ pygmentsCodeFences = true
 pygmentsCodeFencesGuessSyntax = true
 
 enableGitInfo = true
+
+googleAnalytics = "G-CEPR8VKJP7"

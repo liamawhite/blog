@@ -10,6 +10,16 @@
     <meta name="description" content="{{ .Description | default (.Summary | default .Site.Params.description ) }}">
     <meta name="keywords" content="{{ (delimit .Keywords ",") | default .Site.Params.keywords }}">
 
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CEPR8VKJP7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', "{{.Site.GoogleAnalytics}}");
+    </script>
+
     {{ template "_internal/twitter_cards.html" . }}
     {{ template "_internal/opengraph.html" . }}
 
