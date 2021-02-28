@@ -1,0 +1,22 @@
+<section class="container list">
+  <h1 class="title">
+    {{- if eq .Kind "term" -}}
+      {{- i18n .Data.Singular | title -}}
+      {{- print ": " -}}
+    {{- end -}}
+
+    {{- .Title -}}
+  </h1>
+  {{ .Content }}
+  <ul>
+    {{ range .Paginator.Pages }}
+    <li>
+      <span class="date">{{ .Lastmod.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
+        <a class="title" href="{{ .Params.externalLink | default .RelPermalink }}">{{ .Title }}</a>
+        <span class="subtitle">{{ .Params.Subtitle }}</span>
+      </span>
+    </li>
+    {{ end }}
+  </ul>
+  {{ partial "pagination.html" . }}
+</section>

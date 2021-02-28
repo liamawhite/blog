@@ -1,0 +1,55 @@
+@mixin content_dark {
+
+  .content {
+  
+    .list {
+      ul {
+        li {
+          .title {
+            color: $fg-color-dark;
+            &:hover,
+            &:focus {
+              color: $link-color-dark;
+            }
+          }
+          .subtitle {
+            color: $alt-fg-color-dark;
+          }
+        }
+      }
+    }
+
+    .centered {
+      .about {
+        ul {
+          li {
+            a {
+              color: $fg-color-dark;
+              &:hover,
+              &:focus {
+                color: $link-color-dark;
+              }
+            }
+          }
+        }
+      }
+    }
+    .post {
+      .post-meta {
+        border-top: 0.5px solid $alt-fg-color-dark;
+        border-bottom: 0.5px solid $alt-fg-color-dark;
+      }
+    }
+  }
+
+}
+
+body.colorscheme-dark {
+  @include content_dark()
+}
+
+body.colorscheme-auto {
+  @media (prefers-color-scheme: dark) {
+    @include content_dark()
+  }
+}

@@ -1,0 +1,10 @@
+[en]
+    languageName = "English"
+
+    [en.menu]
+
+        # [[en.menu.main]]
+        # name = "Paper Notes"
+        # weight = 1
+        # url = "literature-notes"
+
