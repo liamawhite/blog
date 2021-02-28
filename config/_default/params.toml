@@ -1,7 +1,7 @@
 author = "Liam White"
-description = "John Doe's personal website"
-# keywords = "blog,developer,personal"
-# info = "Full Stack DevOps and Magician"
+description = "Personal website for Liam White"
+keywords = "blog,software engineer,personal"
+info = "Work In Progress"
 
 dateFormat = "January 2"
 
@@ -24,7 +24,7 @@ colorScheme = "auto"
 maxSeeAlsoItems = 5
 
 # Enable Twemoji
-enableTwemoji = true
+enableTwemoji = false
 
 # Custom CSS
 customCSS = []
