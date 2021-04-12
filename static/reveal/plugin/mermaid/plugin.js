@@ -8,7 +8,6 @@ window.RevealMermaid = window.RevealMermaid || {
 const initMermaid = function(Reveal){
     Reveal.addEventListener('ready', function(event){
         Reveal.getSlides().forEach(slide => {
-            console.log(slide)
             slide.querySelectorAll("code.mermaid").forEach(m => {
                 // Use div instead of pre.code to avoid reveal CSS
                 let newDiv = document.createElement("div")
