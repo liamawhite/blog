@@ -2,9 +2,8 @@
     languageName = "English"
 
     [en.menu]
-
-        # [[en.menu.main]]
-        # name = "Paper Notes"
-        # weight = 1
-        # url = "literature-notes"
+        [[en.menu.main]]
+        name = "Talks"
+        weight = 1
+        url = "talks"
 

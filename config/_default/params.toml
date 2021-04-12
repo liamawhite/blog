@@ -3,7 +3,7 @@ description = "Personal website for Liam White"
 keywords = "blog,software engineer,personal"
 info = "Work In Progress"
 
-dateFormat = "January 2"
+dateFormat = "Jan 2 2006"
 
 hideFooter = false
 hideCredits = false

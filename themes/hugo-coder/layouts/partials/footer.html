@@ -1,4 +1,4 @@
-{{ if not .Site.Params.hideFooter | default false }}
+{{ if not .Site.Params.hideFooter | ne .Page.Type "talks" | default false }}
   <footer class="footer">
     <section class="container">
       {{ with .Site.Params.footerContent | safeHTML }}
@@ -14,7 +14,7 @@
       {{ end }}
       {{ if not .Site.Params.hideCredits }}
         {{ if not .Site.Params.hideCopyright }} · {{ end }}
-        {{ i18n "powered_by" }} <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+        {{ i18n "powered_by" }} <a href="https://gohugo.io/">Hugo</a>, <a href="https://github.com/luizdepra/hugo-coder/">Coder</a> & <a href="https://revealjs.com/">reveal.js</a>.
       {{ end }}
       {{ if .Site.Params.commit }}
         {{ if .GitInfo }}
