@@ -1,4 +1,4 @@
-{{ if not .Site.Params.hideFooter | default false }}
+{{ if not .Site.Params.hideFooter | ne .Page.Type "talks" | default false }}
   <footer class="footer">
     <section class="container">
       {{ with .Site.Params.footerContent | safeHTML }}

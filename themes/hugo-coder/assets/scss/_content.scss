@@ -3,6 +3,9 @@
   display: flex;
   margin-top: 1.6rem;
   margin-bottom: 3.2rem;
+  &.talks {
+    margin:0px
+  }
   article {
     header {
       margin-top: 6rem;
