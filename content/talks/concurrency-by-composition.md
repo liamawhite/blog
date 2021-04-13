@@ -60,7 +60,7 @@ Its one of the most cited computer science paper.
 
 The paper does a good job of laying out the model but less so as a critique of modern software patterns (mostly because it was written in 1978)
 
-Instead, I'm going to quote from a paper called The Life of Occam-Pi and we'll come back to the CSP model later with some go code.
+Instead, I'm going to use some quotes from a paper called The Life of Occam-Pi and we'll come back to the CSP model later with some go code.
 
 --
 
@@ -638,7 +638,7 @@ CLICK THROUGH!
 
 --
 
-### Good concurrent design decomposes the core logic into sequential routines.
+### Good concurrent design decomposes the core logic into sequential routines. This makes it easier to reason about and test.
 
 --
 
