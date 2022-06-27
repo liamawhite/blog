@@ -1,0 +1,12 @@
+
+/* Ensure there is padding around iframes */
+.post-content iframe {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+/* Make entry metadata more visible */
+.entry-footer {
+    color: var(--primary);
+    font-weight: 400;
+}

@@ -1,0 +1,53 @@
+baseURL: http://example.org/
+languageCode: en-us
+title: liamwhite.blog
+theme: 
+  - papermod
+  - reveal
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+outputFormats:
+  reveal:
+    baseName: index
+    mediaType: text/html
+    isHTML: true
+menu:
+  main:
+  - identifier: talks
+    name: Talks
+    url: /talks/
+    weight: 20
+  - identifier: rss
+    name: RSS
+    url: index.xml
+    weight: 998
+  - identifier: search
+    name: Search
+    url: /search/
+    weight: 999
+params:
+  # https://github.com/adityatelange/hugo-PaperMod/wiki/Features#home-info-mode
+  homeInfoParams:
+    Title: About me
+    Content: I'm a Software Engineer at Tetrate and Istio maintainer. I lead the cloud team at Tetrate enabling application developers and customers to deliver value without having to worry about the intricacies of infrastructure.
+  mainSections:
+  # talks are weird because of the sections being their own post so are handled in a theme override
+  - posts
+  ShowShareButtons: true
+  ShareButtons: ["twitter", "linkedin", "facebook", "reddit"]
+  socialIcons:
+    - name: "Twitter"
+      url: "https://twitter.com/liamandrewwhite/"
+    - name: "GitHub"
+      url: "https://github.com/liamawhite"
+    - name: "LinkedIn"
+      url: "https://www.linkedin.com/in/liam-white"
+  reveal_hugo:
+    custom_theme: reveal/themes/personal.scss
+    custom_theme_compile: true
+    plugins:
+    - reveal/plugins/code-focus.js
+googleAnalytics: "G-CEPR8VKJP7"

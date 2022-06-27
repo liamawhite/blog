@@ -1,0 +1,6 @@
+[submodule "themes/papermod"]
+	path = themes/papermod
+	url = https://github.com/adityatelange/hugo-PaperMod.git
+[submodule "themes/reveal"]
+	path = themes/reveal
+	url = git@github.com:dzello/reveal-hugo.git

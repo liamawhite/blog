@@ -1,0 +1,1 @@
+These files are all copied from [here](https://github.com/hakimel/reveal.js/tree/master/css/theme/template).
