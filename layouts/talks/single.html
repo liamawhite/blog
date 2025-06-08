@@ -1,0 +1,35 @@
+{{ define "main" }}
+<div class="wrapper post">
+    <main class="page-content" aria-label="Content">
+        <article>
+            <header class="header">
+                {{ if .Params.video }}
+                <iframe width="660" height="380"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen
+                    src="{{ .Params.video }}">
+                </iframe>
+                {{ end }}
+                <h1 class="header-title">{{ .Title }}</h1>
+                {{ $configDateFormat := .Site.Params.dateFormat | default ":date_medium" }}
+                <div class="post-meta">
+                    {{ with .Date }}
+                    {{ $ISO_time := dateFormat "2006-01-02T15:04:05-07:00" . }}
+                    <time datetime="{{ $ISO_time }}" itemprop="datePublished"> {{ . | time.Format $configDateFormat }} </time>
+                    {{ end }}
+                    {{ if .Params.venue }}
+                        <span>&nbsp;·&nbsp;</span>
+                        <span>{{ .Params.venue }}</span>
+                    {{ end }}
+                </div>
+            </header>
+            {{ partial "toc.html" .}}
+            <div class="page-content">
+                {{ .Content }}
+            </div>
+        </article>
+        {{- partial "comments.html" . -}}
+    </main>
+</div>
+{{ end }}

@@ -1,0 +1,56 @@
+baseURL: 'https://example.org/'
+languageCode: 'en-us'
+title: 'Liam White'
+
+
+# [Languages.en-gb]
+#   languageName = "English"
+#   languageCode = "en-gb"
+#   contentDir = "content/en"
+#   weight = 1
+#
+#   [Languages.en-gb.menu]
+#   [[Languages.en-gb.menu.main]]
+#     # The page reference (pageRef) is useful for menu highlighting
+#     # When pageRef is set, setting `url` is optional; it will be used as a fallback if the page is not found.
+#     pageRef="/"
+#     name = 'Home'
+#     url = '/'
+#     weight = 10
+#   [[Languages.en-gb.menu.main]]
+#     pageRef="posts"
+#     name = 'Posts'
+#     url = '/posts/'
+#     weight = 20
+#   [[Languages.en-gb.menu.main]]
+#     pageRef="about"
+#     name = 'About30
+#
+
+menus:
+  main:
+    - name: posts
+      url: /posts/
+      weight: 20
+    - name: talks
+      url: /talks/
+      weight: 30
+
+params:
+  author:
+    name: 'Liam White'
+  mainSections:
+    - posts
+    - talks
+  singularType:
+    posts: post
+    talks: talk
+  socialIcons:
+    - name: github
+      url: https://github.com/liamawhite
+    - name: linkedin
+      url: https://www.linkedin.com/in/liam-white/
+    - name: rss
+      url: /index.xml
+
+
