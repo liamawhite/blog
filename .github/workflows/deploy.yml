@@ -1,26 +1,29 @@
-name: hygiene
+name: deploy
 
 on:
-  pull_request:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
 
 concurrency:
-  group: hygiene-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
-  hygiene:
-    name: build and enforce size budgets
+  deploy:
+    name: deploy to Cloudflare
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      WRANGLER_SEND_METRICS: "false"
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
       - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
-      - name: Build, enforce size budgets, and validate deployment
-        run: make size deploy-check
+      - name: Build and deploy static assets and custom domain
+        run: make deploy
         env:
-          WRANGLER_SEND_METRICS: "false"
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
