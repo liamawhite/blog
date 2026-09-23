@@ -1,4 +1,4 @@
-name: hygiene
+name: pr
 
 on:
   pull_request:
@@ -8,13 +8,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: hygiene-${{ github.event.pull_request.number }}
+  group: pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   hygiene:
     if: github.event.action != 'closed'
-    name: build and enforce size budgets
+    name: hygiene
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,7 +28,7 @@ jobs:
           WRANGLER_SEND_METRICS: "false"
 
   preview:
-    name: deploy PR preview
+    name: preview
     needs: hygiene
     if: >-
       github.event.action != 'closed' &&
@@ -83,7 +83,7 @@ jobs:
             else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
 
   cleanup-preview:
-    name: delete PR preview
+    name: cleanup-preview
     if: >-
       github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&

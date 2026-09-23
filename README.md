@@ -75,10 +75,10 @@ budgets. Analytics will require an explicit measurement policy when added;
 there is no analytics exception yet. The checker assumes conventional generated
 HTML/CSS URLs, not escaped CSS URLs or runtime-generated resource requests.
 
-The **hygiene** GitHub Actions workflow runs only on `pull_request`, on an Ubuntu
+The **pr** GitHub Actions workflow runs only on `pull_request`, on an Ubuntu
 runner with Nix. It runs `make size` and a Wrangler deployment dry run without
 Cloudflare credentials. Build failures, failing checker tests, budget violations,
-and invalid deployment configuration fail **build and enforce size budgets**,
+and invalid deployment configuration fail **pr / hygiene**,
 which is required on `main`.
 
 ## Cloudflare deployment
@@ -121,7 +121,7 @@ PR and merge it; the deployment workflow publishes the rebuilt site.
 
 ## Pull request previews
 
-After the required Hygiene checks pass, PRs from branches in this repository get
+After the required hygiene checks pass, PRs from branches in this repository get
 an isolated Cloudflare Worker Preview named `pr-<number>`. The preview job
 rebuilds the same PR merge revision using the lockfile, publishes it, checks the
 returned URL, and updates a single bot comment on the PR. New pushes update the
@@ -138,7 +138,7 @@ header is a search-engine instruction, not access control.
 When the PR closes or merges, the cleanup job deletes the Preview and updates
 the bot comment. A missing Preview is a successful no-op when using an API token.
 Deploy and cleanup jobs share a per-PR concurrency group. Fork and Dependabot PRs
-run Hygiene only and never receive the Cloudflare token. No `pull_request_target`
+run hygiene only and never receive the Cloudflare token. No `pull_request_target`
 workflow executes PR code.
 
 Locally, authenticate with Wrangler or set `CLOUDFLARE_API_TOKEN`, then use the
