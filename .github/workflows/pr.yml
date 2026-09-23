@@ -83,7 +83,7 @@ jobs:
             else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
 
   cleanup-preview:
-    name: clean up
+    name: cleanup
     if: >-
       github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
