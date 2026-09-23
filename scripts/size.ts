@@ -24,6 +24,7 @@ export async function measurePage(root: string, page: string) {
   const pageURL = new URL(pagePath.replace(/index\.html$/, ''), origin);
   const assets = new Map<string, { css: boolean; script: boolean; font: boolean }>();
   const errors: string[] = [];
+  const excludedEmbeds: string[] = [];
   let inlineJavaScript = 0;
 
   function reference(value: string | null, base: URL, kind = '') {
@@ -75,7 +76,15 @@ export async function measurePage(root: string, page: string) {
         cssReferences(element.getAttribute('style') ?? '', pageURL);
         if (tag === 'base') errors.push('HTML <base> is unsupported by the size checker.');
         if (tag === 'iframe' || tag === 'object' || tag === 'embed') {
-          errors.push(`Embedded <${tag}> content needs a browser budget check; use a click-to-load link.`);
+          const src = element.getAttribute('src') ?? '';
+          if (tag === 'iframe'
+            && /^https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}$/.test(src)
+            && element.getAttribute('loading') === 'lazy'
+            && element.getAttribute('srcdoc') === null) {
+            excludedEmbeds.push(src);
+          } else {
+            errors.push(`Embedded <${tag}> content is unmeasured; only lazy YouTube privacy-enhanced players are allowed.`);
+          }
         }
         if (tag === 'script') {
           const type = element.getAttribute('type')?.toLowerCase();
@@ -139,7 +148,7 @@ export async function measurePage(root: string, page: string) {
     if (kind.font) fontsRaw += bytes.length;
     resources.push({ path: relative(root, path), raw: bytes.length, gzip: zipped });
   }
-  return { page: pagePath, raw, gzip, htmlCssGzip, javascriptRaw, fontsRaw, pageEstimated, resources, errors };
+  return { page: pagePath, raw, gzip, htmlCssGzip, javascriptRaw, fontsRaw, pageEstimated, resources, excludedEmbeds, errors };
 }
 
 export async function checkSize(root: string, limits = budgets) {
@@ -160,6 +169,7 @@ if (import.meta.main) {
     for (const report of reports) {
       console.log(`${report.errors.length ? 'FAIL' : 'PASS'} ${report.page}: ${report.raw} B raw, ${report.gzip} B gzip; HTML/CSS ${report.htmlCssGzip}/${budgets.htmlCssGzip} B gzip; JS ${report.javascriptRaw}/${budgets.javascriptRaw} B; fonts ${report.fontsRaw}/${budgets.fontsRaw} B; estimated page ${report.pageEstimated}/${budgets.pageEstimated} B`);
       for (const asset of report.resources) console.log(`  ${asset.path}: ${asset.raw} B raw, ${asset.gzip} B gzip`);
+      for (const embed of report.excludedEmbeds) console.log(`  Excluded third-party player payload (including JS/fonts): ${embed}`);
       for (const error of report.errors) console.error(`  ${error}`);
     }
     if (reports.some((report) => report.errors.length)) process.exitCode = 1;

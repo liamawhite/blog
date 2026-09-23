@@ -72,6 +72,33 @@ test('counts images, CSS resources and srcset variants once, including lazy imag
   expect(report.errors.some((error) => error.includes('pageEstimated'))).toBe(true);
 });
 
+test('allows and reports only lazy YouTube privacy-enhanced embeds', async () => {
+  const src = 'https://www.youtube-nocookie.com/embed/CK938sKNu4c';
+  const root = await fixture({ 'index.html': `<iframe loading="lazy" src="${src}"></iframe>` });
+  const [report] = await checkSize(root);
+  expect(report.errors).toEqual([]);
+  expect(report.excludedEmbeds).toEqual([src]);
+
+  for (const attributes of [
+    `src="${src}"`,
+    `loading="eager" src="${src}"`,
+    `loading="lazy" src="${src}" srcdoc="<p>Other content</p>"`,
+    `loading="lazy" src="${src}?autoplay=1"`,
+    'loading="lazy" src="https://www.youtube-nocookie.com.evil.example/embed/CK938sKNu4c"',
+    'loading="lazy" src="https://www.youtube-nocookie.com/other"',
+  ]) {
+    await writeFile(join(root, 'index.html'), `<iframe ${attributes}></iframe>`);
+    const [rejected] = await checkSize(root);
+    expect(rejected.errors.some((error) => error.includes('iframe'))).toBe(true);
+    expect(rejected.excludedEmbeds).toEqual([]);
+  }
+  for (const tag of ['object', 'embed']) {
+    await writeFile(join(root, 'index.html'), `<${tag} loading="lazy" src="${src}"></${tag}>`);
+    const [rejected] = await checkSize(root);
+    expect(rejected.errors.some((error) => error.includes(tag))).toBe(true);
+  }
+});
+
 test('fails on a missing build or missing referenced asset', async () => {
   const empty = await fixture({});
   await expect(checkSize(empty)).rejects.toThrow('No HTML pages');

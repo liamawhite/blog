@@ -1,37 +1,63 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { buttonVariants } from '@/components/ui/button';
+import '@/styles/global.css';
+
+const talks = await Promise.all(
+  (await getCollection('talks'))
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .map(async (talk) => ({ ...talk, ...await render(talk) })),
+);
+const dateFormat = new Intl.DateTimeFormat('en', {
+  year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+});
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Liam White's personal blog." />
+    <meta name="description" content="Liam White's personal blog and talks on Kubernetes, cloud-native infrastructure, and more." />
     <title>Liam White</title>
   </head>
   <body>
-    <main>
-      <h1>Liam White</h1>
-      <p>A personal blog. More soon.</p>
+    <main class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+      <h1 class="text-3xl font-semibold tracking-tight">Liam White</h1>
+      <p class="mt-3 text-muted-foreground">A personal blog.</p>
+      <section aria-labelledby="talks" class="mt-12">
+        <h2 id="talks" class="mb-6 text-2xl font-semibold tracking-tight">Talks</h2>
+        {talks.map(({ id, data, Content }) => (
+          <article aria-labelledby={id} class="mt-8">
+            <Card className="[--card-spacing:--spacing(5)] sm:[--card-spacing:--spacing(6)]">
+              <CardHeader>
+              <h3 id={id} class="text-xl font-semibold leading-snug"><a class="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4" href={data.video}>{data.title}</a></h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {data.venue} · <time datetime={data.date.toISOString().slice(0, 10)}>{dateFormat.format(data.date)}</time>
+              </p>
+              </CardHeader>
+              <CardContent>
+              <Content />
+              <iframe
+                class="aspect-video h-auto w-full rounded-md border-0 bg-black"
+                src={`https://www.youtube-nocookie.com/embed/${new URL(data.video).searchParams.get('v')}`}
+                title={`Watch ${data.title}`}
+                loading="lazy"
+                width="672"
+                height="378"
+                allow="encrypted-media; picture-in-picture; fullscreen"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              />
+              </CardContent>
+              <CardFooter>
+                <a class={buttonVariants({ variant: "outline" })} href={data.video}>Watch on YouTube</a>
+              </CardFooter>
+            </Card>
+          </article>
+        ))}
+      </section>
     </main>
   </body>
 </html>
-
-<style>
-  :global(html) {
-    color-scheme: light dark;
-    font-family: system-ui, sans-serif;
-    line-height: 1.6;
-  }
-
-  :global(body) {
-    margin: 0;
-  }
-
-  main {
-    max-width: 42rem;
-    margin: 0 auto;
-    padding: 4rem 1.5rem;
-  }
-
-  h1 {
-    line-height: 1.2;
-  }
-</style>
