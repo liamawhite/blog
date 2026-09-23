@@ -1,4 +1,4 @@
-name: Hygiene
+name: hygiene
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   hygiene:
-    name: Build and size budgets
+    name: build and enforce size budgets
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
