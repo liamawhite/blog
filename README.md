@@ -76,10 +76,11 @@ there is no analytics exception yet. The checker assumes conventional generated
 HTML/CSS URLs, not escaped CSS URLs or runtime-generated resource requests.
 
 The **pr** GitHub Actions workflow runs only on `pull_request`, on an Ubuntu
-runner with Nix. It runs `make size` and a Wrangler deployment dry run without
-Cloudflare credentials. Build failures, failing checker tests, budget violations,
-and invalid deployment configuration fail **pr / hygiene**,
-which is required on `main`.
+runner with Nix. The **pr / hygiene** job runs `make size` without Cloudflare
+credentials. Build failures, failing tests, and budget violations fail hygiene.
+Both **pr / hygiene** and **pr / preview** are required on `main`; preview verifies
+an actual deployment and HTTP response. `make deploy-check` remains available
+for local production deployment validation.
 
 ## Cloudflare deployment
 
