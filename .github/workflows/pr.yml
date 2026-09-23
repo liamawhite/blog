@@ -1,0 +1,117 @@
+name: pr
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    if: github.event.action != 'closed'
+    name: hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - name: Build and enforce size budgets
+        run: make size
+
+  preview:
+    name: preview
+    needs: hygiene
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - name: Check PR is still open and current
+        id: current
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: context.issue.number });
+            core.setOutput('current', pr.state === 'open' && pr.head.sha === context.payload.pull_request.head.sha);
+      - name: Build and publish preview
+        if: steps.current.outputs.current == 'true'
+        id: deploy
+        run: make deploy-preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Check preview responds
+        if: steps.current.outputs.current == 'true'
+        run: curl --fail --silent --show-error --retry 6 --retry-all-errors --retry-delay 5 --max-time 20 "$PREVIEW_URL"
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+      - name: Update preview comment
+        if: steps.current.outputs.current == 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+        with:
+          script: |
+            const marker = '<!-- cloudflare-pr-preview -->';
+            const body = `${marker}\nPreview: ${process.env.PREVIEW_URL}\n\nCommit: ${context.payload.pull_request.head.sha}\nUpdates on each push and is deleted when this PR closes.`;
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: context.issue.number });
+            const previous = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes(marker));
+            if (previous) await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+
+  cleanup-preview:
+    name: cleanup
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - name: Delete preview
+        run: make delete-preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Mark preview removed
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const marker = '<!-- cloudflare-pr-preview -->';
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: context.issue.number });
+            const previous = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes(marker));
+            if (previous) await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: `${marker}\nPreview removed because this PR is closed.` });
