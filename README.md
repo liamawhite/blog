@@ -99,7 +99,7 @@ Astro; Node runs Wrangler.
 The **deploy** workflow runs on pushes to `main`, builds once, then publishes
 using the repository's `CLOUDFLARE_API_TOKEN` Actions secret. The account ID is
 public configuration in `wrangler.jsonc`. Production deployments are serialized;
-a newer push does not cancel an in-flight deployment. PR checks never deploy.
+a newer push does not cancel an in-flight deployment. PR checks never deploy to production.
 
 For a local deployment, authenticate once with:
 
@@ -128,7 +128,9 @@ returned URL, and updates a single bot comment on the PR. New pushes update the
 same preview URL. Production remains on `liamwhite.blog`.
 
 The empty `previews` block in `wrangler.jsonc` enables native Worker Previews;
-the existing `preview_urls: false` setting concerns version URLs. Preview
+`preview_urls: true` enables their workers.dev URLs. For an existing Worker,
+enable Preview URLs in its dashboard settings once before the first preview
+(or deploy this configuration from the production branch). Preview
 deployments ignore dashboard Base settings. The generated preview assets include
 an `X-Robots-Tag: noindex, nofollow` response header. Previews are public, and that
 header is a search-engine instruction, not access control.
