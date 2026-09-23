@@ -34,6 +34,8 @@ background instead. Stop it with `nix develop --command bun --bun astro dev stop
 | `make size` | Build once, test the size checker, and enforce per-page size budgets |
 | `make deploy-check` | Build and validate the Cloudflare deployment without publishing |
 | `make deploy` | Build and publish to Cloudflare, including the custom domain |
+| `make deploy-preview PR=3` | Build and publish the isolated `pr-3` Worker Preview |
+| `make delete-preview PR=3` | Delete `pr-3` and its deployments without rebuilding |
 
 You can also enter `nix develop`, then use `bun install --frozen-lockfile`
 and `bun run dev`, `bun run build`, or `bun run preview` directly.
@@ -87,9 +89,12 @@ Terraform state. Cloudflare manages the custom domain's DNS record and TLS
 certificate. The `workers.dev` address also remains enabled for troubleshooting.
 Missing pages return the static `404.html` with a 404 status.
 
-Wrangler comes from the same pinned Nixpkgs revision as our other tools; it is
-not a separate JavaScript dependency. Use `nix develop --command wrangler`
-for direct CLI access.
+The flake exposes `wrangler` using Nix's Node runtime and the exact Wrangler
+dependency pinned in `package.json` and `bun.lock`. This provides the newer
+Worker Previews CLI while Nixpkgs still packages an older release. Run
+`make install` first, then use `nix develop --command wrangler` from the
+repository root for direct CLI access. Bun still manages dependencies and runs
+Astro; Node runs Wrangler.
 
 The **deploy** workflow runs on pushes to `main`, builds once, then publishes
 using the repository's `CLOUDFLARE_API_TOKEN` Actions secret. The account ID is
@@ -113,3 +118,27 @@ before Cloudflare can attach the hostname.
 After deployment, verify `https://liamwhite.blog/` returns the homepage and an
 unknown path returns 404. To roll back site content, revert the change through a
 PR and merge it; the deployment workflow publishes the rebuilt site.
+
+## Pull request previews
+
+After the required Hygiene checks pass, PRs from branches in this repository get
+an isolated Cloudflare Worker Preview named `pr-<number>`. The preview job
+rebuilds the same PR merge revision using the lockfile, publishes it, checks the
+returned URL, and updates a single bot comment on the PR. New pushes update the
+same preview URL. Production remains on `liamwhite.blog`.
+
+The empty `previews` block in `wrangler.jsonc` enables native Worker Previews;
+the existing `preview_urls: false` setting concerns version URLs. Preview
+deployments ignore dashboard Base settings. The generated preview assets include
+an `X-Robots-Tag: noindex, nofollow` response header. Previews are public, and that
+header is a search-engine instruction, not access control.
+
+When the PR closes or merges, the cleanup job deletes the Preview and updates
+the bot comment. A missing Preview is a successful no-op when using an API token.
+Deploy and cleanup jobs share a per-PR concurrency group. Fork and Dependabot PRs
+run Hygiene only and never receive the Cloudflare token. No `pull_request_target`
+workflow executes PR code.
+
+Locally, authenticate with Wrangler or set `CLOUDFLARE_API_TOKEN`, then use the
+Make commands above. Both require an explicit positive PR number. Preview
+creation and deletion use the same existing Actions secret as production.
