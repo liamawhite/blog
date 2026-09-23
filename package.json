@@ -1,0 +1,14 @@
+{
+  "name": "liam-white-blog",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --bun astro dev",
+    "build": "bun --bun astro build",
+    "preview": "bun --bun astro preview"
+  },
+  "dependencies": {
+    "astro": "7.3.4"
+  }
+}
