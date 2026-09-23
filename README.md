@@ -7,7 +7,7 @@ A minimal static Astro site, using Bun for dependencies and the runtime.
 - Nix with `nix-command` and `flakes` enabled.
 - Make available on your system to run the initial command.
 
-The Nix flake provides Bun, Git, and GNU Make on macOS and Linux (ARM64 and x86-64).
+The Nix flake provides Bun, Git, GNU Make, and Wrangler on macOS and Linux (ARM64 and x86-64).
 It pins Nixpkgs 26.05, which still supports Intel Macs.
 
 ## Development
@@ -32,6 +32,8 @@ background instead. Stop it with `nix develop --command bun --bun astro dev stop
 | `make build` | Install dependencies and build the static site into `dist/` |
 | `make preview` | Build and serve the production site locally |
 | `make size` | Build once, test the size checker, and enforce per-page size budgets |
+| `make deploy-check` | Build and validate the Cloudflare deployment without publishing |
+| `make deploy` | Build and publish to Cloudflare, including the custom domain |
 
 You can also enter `nix develop`, then use `bun install --frozen-lockfile`
 and `bun run dev`, `bun run build`, or `bun run preview` directly.
@@ -40,8 +42,8 @@ Package scripts explicitly use the Bun runtime for Astro.
 ## Project
 
 The homepage is in `src/pages/index.astro`. The site uses plain CSS and system
-fonts, with no client JavaScript in the production homepage. Blog layouts,
-analytics, and deployment will be added later. Talk restoration tasks are tracked
+fonts, with no client JavaScript in the production homepage. Blog layouts and
+analytics will be added later. Talk restoration tasks are tracked
 in `todo.md`.
 
 Keep `flake.lock` and `bun.lock` in version control. To update tools, run
@@ -71,8 +73,43 @@ budgets. Analytics will require an explicit measurement policy when added;
 there is no analytics exception yet. The checker assumes conventional generated
 HTML/CSS URLs, not escaped CSS URLs or runtime-generated resource requests.
 
-The **Hygiene** GitHub Actions workflow runs only on `pull_request`, on an Ubuntu
-runner with Nix. It runs `make size`, so a build failure, failing checker test, or
-budget violation fails **Build and size budgets**. There is no push trigger or
-deployment step. To prevent merging failed checks, select this check as required
-in the repository's branch rules; the workflow itself does not change those rules.
+The **hygiene** GitHub Actions workflow runs only on `pull_request`, on an Ubuntu
+runner with Nix. It runs `make size` and a Wrangler deployment dry run without
+Cloudflare credentials. Build failures, failing checker tests, budget violations,
+and invalid deployment configuration fail **build and enforce size budgets**,
+which is required on `main`.
+
+## Cloudflare deployment
+
+`wrangler.jsonc` defines the `liamwhite-blog` Worker, its static assets from
+`dist/`, and the `liamwhite.blog` custom domain. There is no Worker script or
+Terraform state. Cloudflare manages the custom domain's DNS record and TLS
+certificate. The `workers.dev` address also remains enabled for troubleshooting.
+Missing pages return the static `404.html` with a 404 status.
+
+Wrangler comes from the same pinned Nixpkgs revision as our other tools; it is
+not a separate JavaScript dependency. Use `nix develop --command wrangler`
+for direct CLI access.
+
+The **deploy** workflow runs on pushes to `main`, builds once, then publishes
+using the repository's `CLOUDFLARE_API_TOKEN` Actions secret. The account ID is
+public configuration in `wrangler.jsonc`. Production deployments are serialized;
+a newer push does not cancel an in-flight deployment. PR checks never deploy.
+
+For a local deployment, authenticate once with:
+
+```sh
+nix develop --command wrangler login
+make deploy
+```
+
+Alternatively, supply `CLOUDFLARE_API_TOKEN` through your environment. GitHub's
+stored secret is available only to Actions, not to local commands. Never commit
+the token. `make deploy-check` does not require authentication or change remote
+resources; the first real deployment verifies the token permissions and domain
+availability. An existing conflicting domain/DNS configuration must be resolved
+before Cloudflare can attach the hostname.
+
+After deployment, verify `https://liamwhite.blog/` returns the homepage and an
+unknown path returns 404. To roll back site content, revert the change through a
+PR and merge it; the deployment workflow publishes the rebuilt site.

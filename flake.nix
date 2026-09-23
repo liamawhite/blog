@@ -14,7 +14,7 @@
         in
         {
           default = pkgs.mkShell {
-            packages = with pkgs; [ bun git gnumake ];
+            packages = with pkgs; [ bun git gnumake wrangler ];
           };
         });
     };

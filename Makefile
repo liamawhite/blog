@@ -1,4 +1,4 @@
-.PHONY: install dev build preview size
+.PHONY: install dev build preview size deploy deploy-check
 .DEFAULT_GOAL := dev
 
 NIX_RUN := nix develop --command
@@ -18,3 +18,9 @@ preview: build
 size: build
 	$(NIX_RUN) bun test scripts/size.test.ts
 	$(NIX_RUN) bun run scripts/size.ts
+
+deploy-check: build
+	$(NIX_RUN) wrangler deploy --dry-run
+
+deploy: build
+	$(NIX_RUN) wrangler deploy
