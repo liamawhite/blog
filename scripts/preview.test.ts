@@ -10,13 +10,18 @@ test('requires an explicit numeric PR so cleanup cannot target a production name
 
 test('extracts the stable preview URL, not the unique deployment URL', () => {
   expect(previewURL(JSON.stringify({
-    preview: { urls: ['https://pr-3-liamwhite-blog.liamawhite.workers.dev'] },
-    deployment: { urls: ['https://deployment-specific.example'] },
+    type: 'preview',
+    preview_urls: ['https://pr-3-liamwhite-blog.liamawhite.workers.dev'],
+    deployment_urls: ['https://deployment-specific.example'],
   }))).toBe('https://pr-3-liamwhite-blog.liamawhite.workers.dev/');
 });
 
 test('rejects missing URLs, malformed output and unexpected URL origins', () => {
-  for (const output of ['not JSON', '{}', '{"preview":{"urls":["http://example.com"]}}', '{"preview":{"urls":["https://workers.dev.evil.example"]}}']) {
+  for (const output of ['not JSON', '{}', '{"type":"preview","preview_urls":["http://example.com"]}', '{"type":"preview","preview_urls":["https://workers.dev.evil.example"]}']) {
     expect(() => previewURL(output)).toThrow();
   }
+});
+
+test('reads preview records alongside other structured Wrangler output', () => {
+  expect(previewURL(' {"type":"other"}\n{"type":"preview","preview_urls":["https://pr-3.example.workers.dev"]}\n')).toBe('https://pr-3.example.workers.dev/');
 });

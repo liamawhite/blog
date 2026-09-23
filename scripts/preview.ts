@@ -1,4 +1,6 @@
-import { appendFile } from 'node:fs/promises';
+import { appendFile, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export function previewName(pr: string | undefined) {
   if (!pr || !/^[1-9][0-9]*$/.test(pr)) {
@@ -8,7 +10,8 @@ export function previewName(pr: string | undefined) {
 }
 
 export function previewURL(output: string) {
-  const value = JSON.parse(output).preview?.urls?.[0];
+  const records = output.trim().split('\n').map(line => JSON.parse(line));
+  const value = records.findLast(record => record.type === 'preview')?.preview_urls?.[0];
   if (typeof value !== 'string') throw new Error('Wrangler did not return a Preview URL.');
   const url = new URL(value);
   if (url.protocol !== 'https:' || !url.hostname.endsWith('.workers.dev') || url.username || url.password) {
@@ -43,19 +46,24 @@ async function main() {
 
   // Only the rebuilt preview output gets this header, never production assets.
   await appendFile('dist/_headers', '\n/*\n  X-Robots-Tag: noindex, nofollow\n');
-  const child = Bun.spawn(['wrangler', 'preview', '--name', name, '--ignore-base-config', '--json'], {
-    stdin: 'ignore', stdout: 'pipe', stderr: 'inherit',
-  });
-  const output = await new Response(child.stdout).text();
-  const code = await child.exited;
-  if (code !== 0) {
-    console.error(output);
-    process.exitCode = code;
-    return;
+  const directory = await mkdtemp(join(tmpdir(), 'blog-preview-'));
+  try {
+    const outputPath = join(directory, 'output.jsonl');
+    const child = Bun.spawn(['wrangler', 'preview', '--name', name, '--ignore-base-config'], {
+      stdin: 'ignore', stdout: 'inherit', stderr: 'inherit',
+      env: { ...process.env, WRANGLER_OUTPUT_FILE_PATH: outputPath },
+    });
+    const code = await child.exited;
+    if (code !== 0) {
+      process.exitCode = code;
+      return;
+    }
+    const url = previewURL(await Bun.file(outputPath).text());
+    console.log(`Preview: ${url}`);
+    if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `preview_url=${url}\n`);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
-  const url = previewURL(output);
-  console.log(`Preview: ${url}`);
-  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `preview_url=${url}\n`);
 }
 
 if (import.meta.main) {
