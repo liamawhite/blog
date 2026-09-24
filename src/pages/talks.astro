@@ -14,8 +14,7 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 ---
 
 <SiteLayout title="Talks — Liam White" description="Talks by Liam White on Kubernetes, cloud-native infrastructure, and more.">
-      <section aria-labelledby="talks">
-        <h1 id="talks" class="mb-6 text-3xl font-semibold tracking-tight">Talks</h1>
+      <section aria-label="Talks">
         {talks.map(({ id, data, Content }) => (
           <article aria-labelledby={id} class="mt-8">
             <Card className="[--card-spacing:--spacing(5)] sm:[--card-spacing:--spacing(6)]">
