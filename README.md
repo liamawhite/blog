@@ -145,8 +145,9 @@ PR and merge it; the deployment workflow publishes the rebuilt site.
 
 ## Pull request previews
 
-After the required hygiene checks pass, PRs from branches in this repository get
-an isolated Cloudflare Worker Preview named `pr-<number>`. The preview job
+PRs from branches in this repository get an isolated Cloudflare Worker Preview
+named `pr-<number>`. Preview and hygiene run independently in parallel, so hygiene
+failures do not block preview deployment. Both checks remain required for merging. The preview job
 rebuilds the same PR merge revision using the lockfile, publishes it, checks the
 returned URL, and updates a single bot comment on the PR. New pushes update the
 same preview URL. Production remains on `liamwhite.blog`.
