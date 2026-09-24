@@ -43,10 +43,29 @@ Package scripts explicitly use the Bun runtime for Astro.
 
 ## Project
 
-The homepage is in `src/pages/index.astro`. The site uses plain CSS and system
-fonts, with no client JavaScript in the production homepage. Blog layouts and
-analytics will be added later. Talk restoration tasks are tracked
-in `todo.md`.
+The homepage is in `src/pages/index.astro`. The site uses Tailwind CSS, shadcn/ui components, and system
+fonts, with a small first-party theme script. The homepage links to `/talks/` and social profiles. The talks page lists recordings
+newest first from Markdown files in `src/content/talks/`, validated by
+`src/content.config.ts`. Each file has `title`, `date` (YYYY-MM-DD), `venue`, and
+`video` (a full YouTube watch URL) frontmatter; optional Markdown bodies appear
+above the player. Dates are displayed in UTC to preserve the original day.
+
+Tailwind is configured through `@tailwindcss/vite`; shadcn/ui configuration lives
+in `components.json`, with owned component sources in `src/components/ui/`.
+React components render to static HTML through Astro (no `client:*` directives).
+The top-right Lucide sun/moon button toggles between light and dark. With no saved
+choice it follows the system, including live system changes. Clicking it saves an
+explicit light/dark preference in local storage and applies it before first paint
+on later visits. Existing `system` preferences still follow the system. If storage
+is unavailable the button works for the current page; without JavaScript the page
+follows the system and the button stays disabled. React and
+React DOM are pinned to 19.2.4: 19.3.0 failed during static rendering with the
+current Bun 1.3.13 runtime.
+
+Talks use responsive YouTube privacy-enhanced embeds with native `loading="lazy"`
+and a direct video link. The browser decides how far ahead of the viewport to
+load each player; this is not click-to-load. Player scripts and requests are
+third-party resources. Blog layouts and analytics will be added later.
 
 Keep `flake.lock` and `bun.lock` in version control. To update tools, run
 `nix flake update`; to update JavaScript dependencies, edit `package.json` and run
@@ -58,7 +77,7 @@ Run `make size` before opening a pull request. Limits live in `size-budget.json`
 and use decimal bytes:
 
 - HTML plus referenced CSS: 30,000 bytes gzipped.
-- Referenced and inline executable JavaScript: zero bytes.
+- Referenced and inline executable JavaScript: 2,000 raw bytes (theme control).
 - Referenced fonts: zero bytes.
 - Estimated page payload: 200,000 bytes.
 
@@ -70,8 +89,12 @@ JSON-LD is allowed and counted as HTML, not executable JavaScript.
 The page estimate uses gzip for text and original sizes for binary assets. It
 conservatively includes lazy media and all `srcset` variants. It is not an actual
 browser transfer measurement or an initial-load timing test. Remote resources,
-embedded documents, and missing files fail the check rather than bypassing the
-budgets. Analytics will require an explicit measurement policy when added;
+embedded documents, and missing files fail the check, except for lazy YouTube
+iframes whose URLs exactly match `https://www.youtube-nocookie.com/embed/VIDEO_ID`
+(without query parameters or `srcdoc`). The report lists these embeds as excluded:
+their third-party payload, JavaScript, and fonts are not measured or covered by
+the local page budgets. Other remote resources and embeds remain rejected.
+Analytics will require an explicit measurement policy when added;
 there is no analytics exception yet. The checker assumes conventional generated
 HTML/CSS URLs, not escaped CSS URLs or runtime-generated resource requests.
 
@@ -122,8 +145,9 @@ PR and merge it; the deployment workflow publishes the rebuilt site.
 
 ## Pull request previews
 
-After the required hygiene checks pass, PRs from branches in this repository get
-an isolated Cloudflare Worker Preview named `pr-<number>`. The preview job
+PRs from branches in this repository get an isolated Cloudflare Worker Preview
+named `pr-<number>`. Preview and hygiene run independently in parallel, so hygiene
+failures do not block preview deployment. Both checks remain required for merging. The preview job
 rebuilds the same PR merge revision using the lockfile, publishes it, checks the
 returned URL, and updates a single bot comment on the PR. New pushes update the
 same preview URL. Production remains on `liamwhite.blog`.

@@ -1,0 +1,33 @@
+---
+import ThemeScript from '@/components/ThemeScript.astro';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import { House } from 'lucide-react';
+import '@/styles/global.css';
+interface Props { title: string; description: string; home?: boolean }
+const { title, description, home = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <ThemeScript />
+  </head>
+  <body class="relative min-h-svh">
+    <div class="absolute right-4 top-4 z-10"><ThemeToggle /></div>
+    <div class:list={["mx-auto max-w-3xl px-5 sm:px-8", !home && "py-8 sm:py-12"]}>
+      {!home && <header class="mb-12 flex h-9 items-center pr-12">
+        <nav aria-label="Main" class="flex items-center gap-3">
+          <a href="/" aria-label="Home" title="Home" class="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4">
+            <House size={18} aria-hidden="true" />
+          </a>
+          <a href="/talks/" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/talks' ? 'page' : undefined} class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4">Talks</a>
+        </nav>
+      </header>}
+      <main class:list={[home && "flex flex-col items-center pb-16 pt-[max(6rem,25svh)]"]}><slot /></main>
+    </div>
+  </body>
+</html>

@@ -1,37 +1,11 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Liam White's personal blog." />
-    <title>Liam White</title>
-  </head>
-  <body>
-    <main>
-      <h1>Liam White</h1>
-      <p>A personal blog. More soon.</p>
-    </main>
-  </body>
-</html>
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import SocialLinks from '@/components/SocialLinks.astro';
+---
 
-<style>
-  :global(html) {
-    color-scheme: light dark;
-    font-family: system-ui, sans-serif;
-    line-height: 1.6;
-  }
-
-  :global(body) {
-    margin: 0;
-  }
-
-  main {
-    max-width: 42rem;
-    margin: 0 auto;
-    padding: 4rem 1.5rem;
-  }
-
-  h1 {
-    line-height: 1.2;
-  }
-</style>
+<SiteLayout title="Liam White" description="Liam White's personal blog and talks." home>
+  <nav aria-label="Main">
+    <a href="/talks/" class="text-lg hover:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-4">Talks</a>
+  </nav>
+  <SocialLinks linkedin="https://www.linkedin.com/in/liam-white" />
+</SiteLayout>

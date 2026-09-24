@@ -40,11 +40,11 @@ test('fails when HTML/CSS exceeds the budget', async () => {
   expect(report.errors.some((error) => error.includes('htmlCssGzip'))).toBe(true);
 });
 
-test('rejects scripts, inline handlers and fonts reached through CSS', async () => {
+test('rejects over-budget scripts including inline handlers and fonts reached through CSS', async () => {
   const root = await fixture({
     'index.html': '<link rel="stylesheet" href="/style.css"><button onclick="alert(1)">Hi</button><script src="/app.js"></script><script>console.log(1)</script>',
     'style.css': '@font-face { font-family: test; src: url("/test.woff2") }',
-    'app.js': 'console.log(2)',
+    'app.js': 'console.log(2);'.repeat(200),
     'test.woff2': 'test font bytes',
   });
   const [report] = await checkSize(root);
@@ -72,6 +72,33 @@ test('counts images, CSS resources and srcset variants once, including lazy imag
   expect(report.errors.some((error) => error.includes('pageEstimated'))).toBe(true);
 });
 
+test('allows and reports only lazy YouTube privacy-enhanced embeds', async () => {
+  const src = 'https://www.youtube-nocookie.com/embed/CK938sKNu4c';
+  const root = await fixture({ 'index.html': `<iframe loading="lazy" src="${src}"></iframe>` });
+  const [report] = await checkSize(root);
+  expect(report.errors).toEqual([]);
+  expect(report.excludedEmbeds).toEqual([src]);
+
+  for (const attributes of [
+    `src="${src}"`,
+    `loading="eager" src="${src}"`,
+    `loading="lazy" src="${src}" srcdoc="<p>Other content</p>"`,
+    `loading="lazy" src="${src}?autoplay=1"`,
+    'loading="lazy" src="https://www.youtube-nocookie.com.evil.example/embed/CK938sKNu4c"',
+    'loading="lazy" src="https://www.youtube-nocookie.com/other"',
+  ]) {
+    await writeFile(join(root, 'index.html'), `<iframe ${attributes}></iframe>`);
+    const [rejected] = await checkSize(root);
+    expect(rejected.errors.some((error) => error.includes('iframe'))).toBe(true);
+    expect(rejected.excludedEmbeds).toEqual([]);
+  }
+  for (const tag of ['object', 'embed']) {
+    await writeFile(join(root, 'index.html'), `<${tag} loading="lazy" src="${src}"></${tag}>`);
+    const [rejected] = await checkSize(root);
+    expect(rejected.errors.some((error) => error.includes(tag))).toBe(true);
+  }
+});
+
 test('fails on a missing build or missing referenced asset', async () => {
   const empty = await fixture({});
   await expect(checkSize(empty)).rejects.toThrow('No HTML pages');
@@ -80,7 +107,7 @@ test('fails on a missing build or missing referenced asset', async () => {
 });
 
 test('CLI exits nonzero on violations so CI can enforce the budget', async () => {
-  const root = await fixture({ 'dist/index.html': '<script>alert(1)</script>' });
+  const root = await fixture({ 'dist/index.html': `<script>${'alert(1);'.repeat(300)}</script>` });
   const result = Bun.spawnSync([process.execPath, join(import.meta.dir, 'size.ts')], { cwd: root });
   expect(result.exitCode).toBe(1);
   expect(result.stderr.toString()).toContain('javascriptRaw');
