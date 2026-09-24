@@ -1,0 +1,14 @@
+---
+import { Sun, Moon } from 'lucide-react';
+---
+
+<button
+  id="theme"
+  type="button"
+  disabled
+  aria-label="Toggle color theme"
+  class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring disabled:opacity-50"
+>
+  <Moon size={16} aria-hidden="true" className="dark:hidden" />
+  <Sun size={16} aria-hidden="true" className="hidden dark:block" />
+</button>

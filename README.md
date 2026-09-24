@@ -53,11 +53,12 @@ above the player. Dates are displayed in UTC to preserve the original day.
 Tailwind is configured through `@tailwindcss/vite`; shadcn/ui configuration lives
 in `components.json`, with owned component sources in `src/components/ui/`.
 React components render to static HTML through Astro (no `client:*` directives).
-The top-right Lucide icon theme selector offers Light, Dark, and System (the default). It
-remembers the preference in local storage, applies it before first paint, and
-tracks system changes while in System mode. If storage is unavailable the selector
-still works for the current page; without JavaScript the page follows the system
-and the selector stays disabled. React and
+The top-right Lucide sun/moon button toggles between light and dark. With no saved
+choice it follows the system, including live system changes. Clicking it saves an
+explicit light/dark preference in local storage and applies it before first paint
+on later visits. Existing `system` preferences still follow the system. If storage
+is unavailable the button works for the current page; without JavaScript the page
+follows the system and the button stays disabled. React and
 React DOM are pinned to 19.2.4: 19.3.0 failed during static rendering with the
 current Bun 1.3.13 runtime.
 

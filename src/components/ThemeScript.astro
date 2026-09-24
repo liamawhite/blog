@@ -3,31 +3,33 @@
   (() => {
     const root = document.documentElement;
     const system = matchMedia('(prefers-color-scheme: dark)');
-    const valid = (value) => ['light', 'dark', 'system'].includes(value) ? value : 'system';
+    const valid = (value) => ['light', 'dark'].includes(value) ? value : 'system';
     let mode = 'system';
     try { mode = valid(localStorage.getItem('theme')); } catch {}
     const apply = () => {
       root.dataset.theme = mode === 'system' ? (system.matches ? 'dark' : 'light') : mode;
+      const button = document.getElementById('theme');
+      if (button) {
+        const label = root.dataset.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        button.setAttribute('aria-label', label);
+        button.title = label;
+      }
     };
     apply();
     system.addEventListener('change', apply);
     document.addEventListener('DOMContentLoaded', () => {
-      const control = document.getElementById('theme');
-      if (!control) return;
-      const sync = () => control.querySelectorAll('input').forEach((input) => {
-        input.checked = input.value === mode;
-      });
-      sync();
-      control.disabled = false;
-      control.addEventListener('change', (event) => {
-        mode = valid(event.target.value);
+      const button = document.getElementById('theme');
+      if (!button) return;
+      apply();
+      button.disabled = false;
+      button.addEventListener('click', () => {
+        mode = root.dataset.theme === 'dark' ? 'light' : 'dark';
         apply();
         try { localStorage.setItem('theme', mode); } catch {}
       });
       window.addEventListener('storage', (event) => {
         if (event.key !== 'theme' && event.key !== null) return;
         mode = valid(event.newValue);
-        sync();
         apply();
       });
     });
