@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { buttonVariants } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import SiteLayout from '@/layouts/SiteLayout.astro';
 
 const talks = await Promise.all(
@@ -40,9 +39,6 @@ const dateFormat = new Intl.DateTimeFormat('en', {
                 allowfullscreen
               />
               </CardContent>
-              <CardFooter>
-                <a class={buttonVariants({ variant: "outline" })} href={data.video}>Watch on YouTube</a>
-              </CardFooter>
             </Card>
           </article>
         ))}
