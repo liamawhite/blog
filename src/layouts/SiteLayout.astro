@@ -21,7 +21,7 @@ const { title, description, home = false } = Astro.props;
       {!home && <header class="mb-12 flex h-9 items-center pr-12">
         <a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Liam White</a>
       </header>}
-      <main class:list={[home && "flex min-h-svh flex-col items-center justify-center py-28"]}><slot /></main>
+      <main class:list={[home && "flex flex-col items-center pb-16 pt-[max(6rem,25svh)]"]}><slot /></main>
     </div>
   </body>
 </html>
