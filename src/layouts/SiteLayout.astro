@@ -1,0 +1,27 @@
+---
+import ThemeScript from '@/components/ThemeScript.astro';
+import ThemeSelect from '@/components/ThemeSelect.astro';
+import '@/styles/global.css';
+interface Props { title: string; description: string; home?: boolean }
+const { title, description, home = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <ThemeScript />
+  </head>
+  <body>
+    <div class="mx-auto max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <header class="mb-12 flex items-center justify-between gap-4">
+        {home ? <span /> : <a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Liam White</a>}
+        <ThemeSelect />
+      </header>
+      <main><slot /></main>
+    </div>
+  </body>
+</html>

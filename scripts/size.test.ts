@@ -40,11 +40,11 @@ test('fails when HTML/CSS exceeds the budget', async () => {
   expect(report.errors.some((error) => error.includes('htmlCssGzip'))).toBe(true);
 });
 
-test('rejects scripts, inline handlers and fonts reached through CSS', async () => {
+test('rejects over-budget scripts including inline handlers and fonts reached through CSS', async () => {
   const root = await fixture({
     'index.html': '<link rel="stylesheet" href="/style.css"><button onclick="alert(1)">Hi</button><script src="/app.js"></script><script>console.log(1)</script>',
     'style.css': '@font-face { font-family: test; src: url("/test.woff2") }',
-    'app.js': 'console.log(2)',
+    'app.js': 'console.log(2);'.repeat(200),
     'test.woff2': 'test font bytes',
   });
   const [report] = await checkSize(root);
@@ -107,7 +107,7 @@ test('fails on a missing build or missing referenced asset', async () => {
 });
 
 test('CLI exits nonzero on violations so CI can enforce the budget', async () => {
-  const root = await fixture({ 'dist/index.html': '<script>alert(1)</script>' });
+  const root = await fixture({ 'dist/index.html': `<script>${'alert(1);'.repeat(300)}</script>` });
   const result = Bun.spawnSync([process.execPath, join(import.meta.dir, 'size.ts')], { cwd: root });
   expect(result.exitCode).toBe(1);
   expect(result.stderr.toString()).toContain('javascriptRaw');

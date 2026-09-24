@@ -44,8 +44,8 @@ Package scripts explicitly use the Bun runtime for Astro.
 ## Project
 
 The homepage is in `src/pages/index.astro`. The site uses Tailwind CSS, shadcn/ui components, and system
-fonts, with no first-party client JavaScript. The homepage lists talks newest
-first from Markdown files in `src/content/talks/`, validated by
+fonts, with a small first-party theme script. The homepage links to `/talks/` and social profiles. The talks page lists recordings
+newest first from Markdown files in `src/content/talks/`, validated by
 `src/content.config.ts`. Each file has `title`, `date` (YYYY-MM-DD), `venue`, and
 `video` (a full YouTube watch URL) frontmatter; optional Markdown bodies appear
 above the player. Dates are displayed in UTC to preserve the original day.
@@ -53,7 +53,11 @@ above the player. Dates are displayed in UTC to preserve the original day.
 Tailwind is configured through `@tailwindcss/vite`; shadcn/ui configuration lives
 in `components.json`, with owned component sources in `src/components/ui/`.
 React components render to static HTML through Astro (no `client:*` directives).
-The shared theme follows the system light/dark preference using CSS. React and
+The top-right Lucide icon theme selector offers Light, Dark, and System (the default). It
+remembers the preference in local storage, applies it before first paint, and
+tracks system changes while in System mode. If storage is unavailable the selector
+still works for the current page; without JavaScript the page follows the system
+and the selector stays disabled. React and
 React DOM are pinned to 19.2.4: 19.3.0 failed during static rendering with the
 current Bun 1.3.13 runtime.
 
@@ -72,7 +76,7 @@ Run `make size` before opening a pull request. Limits live in `size-budget.json`
 and use decimal bytes:
 
 - HTML plus referenced CSS: 30,000 bytes gzipped.
-- Referenced and inline executable JavaScript: zero bytes.
+- Referenced and inline executable JavaScript: 2,000 raw bytes (theme control).
 - Referenced fonts: zero bytes.
 - Estimated page payload: 200,000 bytes.
 

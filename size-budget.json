@@ -1,6 +1,6 @@
 {
   "htmlCssGzip": 30000,
-  "javascriptRaw": 0,
+  "javascriptRaw": 2000,
   "fontsRaw": 0,
   "pageEstimated": 200000
 }

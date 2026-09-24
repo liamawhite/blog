@@ -1,0 +1,12 @@
+---
+import Github from '@/components/icons/Github.astro';
+import Linkedin from '@/components/icons/Linkedin.astro';
+interface Props { linkedin?: string }
+const { linkedin } = Astro.props;
+const linkClass = 'inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4';
+---
+
+<nav aria-label="Social profiles" class="mt-6 flex gap-2">
+  <a href="https://github.com/liamawhite" aria-label="GitHub" title="GitHub" class={linkClass}><Github /></a>
+  {linkedin && <a href={linkedin} aria-label="LinkedIn" title="LinkedIn" class={linkClass}><Linkedin /></a>}
+</nav>
