@@ -15,12 +15,12 @@ const { title, description, home = false } = Astro.props;
     <title>{title}</title>
     <ThemeScript />
   </head>
-  <body>
-    <div class:list={["mx-auto max-w-3xl px-5 sm:px-8", home ? "relative" : "py-8 sm:py-12"]}>
-      <header class:list={["flex items-center gap-4", home ? "absolute inset-x-5 top-8 justify-end sm:inset-x-8 sm:top-12" : "mb-12 justify-between"]}>
-        {!home && <a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Liam White</a>}
-        <ThemeToggle />
-      </header>
+  <body class="relative min-h-svh">
+    <div class="absolute right-4 top-4 z-10"><ThemeToggle /></div>
+    <div class:list={["mx-auto max-w-3xl px-5 sm:px-8", !home && "py-8 sm:py-12"]}>
+      {!home && <header class="mb-12 flex h-9 items-center pr-12">
+        <a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Liam White</a>
+      </header>}
       <main class:list={[home && "flex min-h-svh flex-col items-center justify-center py-28"]}><slot /></main>
     </div>
   </body>
